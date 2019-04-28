@@ -1,0 +1,13 @@
+[package]
+name = "batch-rename"
+version = "0.1.0"
+authors = ["Caleb Bassi <calebjbassi@gmail.com>"]
+edition = "2018"
+
+[[bin]]
+name = "batch-rename"
+path = "src/main.rs"
+
+[dependencies]
+structopt = "0.2.15"
+tempfile = "3.0.7"

@@ -2,7 +2,7 @@ use std::env;
 use std::fs;
 use std::io::Write;
 use std::path::PathBuf;
-use std::process::Command;
+use std::process::{exit, Command};
 
 use structopt::StructOpt;
 
@@ -39,7 +39,7 @@ fn main() {
         .status()
         .unwrap();
     if !status.success() {
-        return;
+        exit(1);
     }
 
     for line in fs::read_to_string(temp_filepath).unwrap().lines() {

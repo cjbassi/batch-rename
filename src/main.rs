@@ -13,7 +13,7 @@ use errors::UnwrapOrExit;
 
 #[derive(StructOpt, Debug)]
 pub struct Args {
-    pub directory: Option<PathBuf>,
+    pub paths: Vec<PathBuf>,
 
     #[structopt(short = "f", long = "force")]
     pub force: bool,
@@ -25,29 +25,19 @@ pub struct Args {
 fn main() {
     let args = Args::from_args();
 
+    if args.paths.is_empty() {
+        return;
+    }
+
     let temp_dir = tempfile::tempdir().unwrap_or_exit("create temp dir");
     let temp_filepath = temp_dir.path().join("tempfile");
     let mut temp_file = fs::File::create(&temp_filepath)
         .unwrap_or_exit(&format!("create temp file {}", &temp_filepath.display()));
 
-    if let Some(dir) = args.directory.clone() {
-        env::set_current_dir(&dir).unwrap_or_exit(&format!("navigate to {}", dir.display()));
-    }
-    let cwd = env::current_dir().unwrap_or_exit("get current directory");
-
-    let mut filenames: Vec<String> = fs::read_dir(&cwd)
-        .unwrap_or_exit(&format!("read directory {}", cwd.display()))
-        .map(|dir_entry| {
-            let filepath = dir_entry.unwrap().path();
-            let filename = filepath.file_name().unwrap().to_string_lossy().to_string();
-            filename
-        })
-        .collect();
-
+    let mut filenames = args.paths.clone();
     filenames.sort();
-
     filenames.iter().for_each(|filename| {
-        writeln!(temp_file, "{}", filename,)
+        writeln!(temp_file, "{}", filename.display())
             .unwrap_or_exit(&format!("write to file {}", temp_filepath.display()));
     });
 
@@ -74,11 +64,11 @@ fn main() {
         .for_each(|(from, to)| match fs::rename(from, to) {
             Ok(()) => {
                 if args.verbose {
-                    println!("renamed '{}' -> '{}'", from, to);
+                    println!("renamed '{}' -> '{}'", from.display(), to);
                 }
             }
             Err(e) => {
-                print_error!("rename '{}' to '{}'", from, to, e);
+                print_error!("rename '{}' to '{}'", from.display(), to, e);
             }
         });
 }

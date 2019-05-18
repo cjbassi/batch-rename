@@ -27,11 +27,28 @@ fn main() {
         env::set_current_dir(dir).unwrap();
     }
     let cwd = env::current_dir().unwrap();
-    for dir_entry in fs::read_dir(cwd).unwrap() {
-        let filepath = dir_entry.unwrap().path();
-        let filename = filepath.file_name().unwrap().to_string_lossy();
-        writeln!(temp_file, "{} {}", filename, filename).unwrap();
-    }
+    let filenames: Vec<String> = fs::read_dir(cwd)
+        .unwrap()
+        .map(|dir_entry| {
+            let filepath = dir_entry.unwrap().path();
+            let filename = filepath.file_name().unwrap().to_string_lossy().to_string();
+            filename
+        })
+        .collect();
+    let longest_filename_len = match filenames.iter().map(|filename| filename.len()).max() {
+        Some(x) => x,
+        None => return,
+    };
+    filenames.iter().for_each(|filename| {
+        writeln!(
+            temp_file,
+            "{:width$} {}",
+            filename,
+            filename,
+            width = longest_filename_len + 1
+        )
+        .unwrap();
+    });
 
     let editor = env::var("EDITOR").unwrap();
     let status = Command::new(editor)

@@ -46,20 +46,9 @@ fn main() {
 
     filenames.sort();
 
-    let longest_filename_len = match filenames.iter().map(|filename| filename.len()).max() {
-        Some(x) => x,
-        None => return,
-    };
-
     filenames.iter().for_each(|filename| {
-        writeln!(
-            temp_file,
-            "{:width$} {}",
-            filename,
-            filename,
-            width = longest_filename_len + 1
-        )
-        .unwrap_or_exit(&format!("write to file {}", temp_filepath.display()));
+        writeln!(temp_file, "{}", filename,)
+            .unwrap_or_exit(&format!("write to file {}", temp_filepath.display()));
     });
 
     let editor = env::var("EDITOR").unwrap_or_exit("read EDITOR env variable");
@@ -71,22 +60,25 @@ fn main() {
         exit(1);
     }
 
-    fs::read_to_string(&temp_filepath)
-        .unwrap_or_exit(&format!("read temp_file {}", temp_filepath.display()))
-        .lines()
-        .for_each(|line| {
-            let filenames = line.split_whitespace().collect::<Vec<&str>>();
-            let from = filenames[0];
-            let to = filenames[1];
-            match fs::rename(from, to) {
-                Ok(()) => {
-                    if args.verbose {
-                        println!("renamed '{}' -> '{}'", from, to);
-                    }
+    let file_contents = fs::read_to_string(&temp_filepath)
+        .unwrap_or_exit(&format!("read temp_file {}", temp_filepath.display()));
+    let new_filenames: Vec<&str> = file_contents.lines().collect();
+    if filenames.len() != new_filenames.len() {
+        println!("error: incorrect number of file names");
+        exit(1);
+    }
+
+    filenames
+        .iter()
+        .zip(new_filenames.iter())
+        .for_each(|(from, to)| match fs::rename(from, to) {
+            Ok(()) => {
+                if args.verbose {
+                    println!("renamed '{}' -> '{}'", from, to);
                 }
-                Err(e) => {
-                    print_error!("rename '{}' to '{}'", from, to, e);
-                }
+            }
+            Err(e) => {
+                print_error!("rename '{}' to '{}'", from, to, e);
             }
         });
 }

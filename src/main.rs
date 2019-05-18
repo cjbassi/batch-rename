@@ -50,9 +50,11 @@ fn main() {
         exit(1);
     }
 
-    let file_contents = fs::read_to_string(&temp_filepath)
-        .unwrap_or_exit(&format!("read temp_file {}", temp_filepath.display()));
-    let new_filenames: Vec<&str> = file_contents.lines().collect();
+    let new_filenames: Vec<PathBuf> = fs::read_to_string(&temp_filepath)
+        .unwrap_or_exit(&format!("read temp_file {}", temp_filepath.display()))
+        .lines()
+        .map(PathBuf::from)
+        .collect();
     if filenames.len() != new_filenames.len() {
         println!("error: incorrect number of file names");
         exit(1);
@@ -61,14 +63,15 @@ fn main() {
     filenames
         .iter()
         .zip(new_filenames.iter())
+        .filter(|(from, to)| from != to)
         .for_each(|(from, to)| match fs::rename(from, to) {
             Ok(()) => {
                 if args.verbose {
-                    println!("renamed '{}' -> '{}'", from.display(), to);
+                    println!("renamed '{}' -> '{}'", from.display(), to.display());
                 }
             }
             Err(e) => {
-                print_error!("rename '{}' to '{}'", from.display(), to, e);
+                print_error!("rename '{}' to '{}'", from.display(), to.display(), e);
             }
         });
 }

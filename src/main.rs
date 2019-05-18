@@ -27,7 +27,7 @@ fn main() {
         env::set_current_dir(dir).unwrap();
     }
     let cwd = env::current_dir().unwrap();
-    let filenames: Vec<String> = fs::read_dir(cwd)
+    let mut filenames: Vec<String> = fs::read_dir(cwd)
         .unwrap()
         .map(|dir_entry| {
             let filepath = dir_entry.unwrap().path();
@@ -35,6 +35,7 @@ fn main() {
             filename
         })
         .collect();
+    filenames.sort();
     let longest_filename_len = match filenames.iter().map(|filename| filename.len()).max() {
         Some(x) => x,
         None => return,

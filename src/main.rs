@@ -56,7 +56,7 @@ fn main() {
         .map(PathBuf::from)
         .collect();
     if filenames.len() != new_filenames.len() {
-        println!("error: incorrect number of file names");
+        eprintln!("error: incorrect number of file names");
         exit(1);
     }
 
@@ -64,14 +64,24 @@ fn main() {
         .iter()
         .zip(new_filenames.iter())
         .filter(|(from, to)| from != to)
-        .for_each(|(from, to)| match fs::rename(from, to) {
-            Ok(()) => {
-                if args.verbose {
-                    println!("renamed '{}' -> '{}'", from.display(), to.display());
+        .for_each(|(from, to)| {
+            if to.exists() && !args.force {
+                eprintln!(
+                    "error: failed to rename '{}' to '{}': file already exists",
+                    from.display(),
+                    to.display()
+                );
+            } else {
+                match fs::rename(from, to) {
+                    Ok(()) => {
+                        if args.verbose {
+                            println!("renamed '{}' -> '{}'", from.display(), to.display());
+                        }
+                    }
+                    Err(e) => {
+                        print_error!("rename '{}' to '{}'", from.display(), to.display(), e);
+                    }
                 }
-            }
-            Err(e) => {
-                print_error!("rename '{}' to '{}'", from.display(), to.display(), e);
             }
         });
 }

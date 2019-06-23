@@ -6,13 +6,13 @@ Takes in a list of filenames on the command line, which are copied into the defa
 
 ## Example
 
-Running:
+Running the command:
 
 ```bash
 batch-rename foo bar baz
 ```
 
-opens a text editor with
+opens a text editor with:
 
 ```
 foo

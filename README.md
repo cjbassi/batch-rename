@@ -2,6 +2,26 @@
 
 Quickly rename a batch of files in your default text editor.
 
+Takes in a list of filenames on the command line, which are copied into the default text editor, and renames the files based on edits done to the filenames.
+
+## Example
+
+Running:
+
+```bash
+batch-rename foo bar baz
+```
+
+opens a text editor with
+
+```
+foo
+bar
+baz
+```
+
+and changing any of the filenames causes those files to be renamed when the editor is closed.
+
 ## Installation
 
 ### Prebuilt binaries:

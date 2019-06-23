@@ -15,9 +15,11 @@ use errors::UnwrapOrExit;
 pub struct Args {
     pub paths: Vec<PathBuf>,
 
+    /// Overwrite existing files/directories
     #[structopt(short = "f", long = "force")]
     pub force: bool,
 
+    /// Explain what is being done
     #[structopt(short = "v", long = "verbose")]
     pub verbose: bool,
 }

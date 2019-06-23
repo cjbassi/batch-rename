@@ -1,6 +1,6 @@
 [package]
 name = "batch-rename"
-version = "0.2.0"
+version = "0.2.1"
 authors = ["Caleb Bassi <calebjbassi@gmail.com>"]
 edition = "2018"
 

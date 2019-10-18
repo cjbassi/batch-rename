@@ -27,16 +27,20 @@ pub struct Args {
 fn main() {
     let args = Args::from_args();
 
-    if args.paths.is_empty() {
-        return;
-    }
-
     let temp_dir = tempfile::tempdir().unwrap_or_exit("create temp dir");
     let temp_filepath = temp_dir.path().join("tempfile");
     let mut temp_file = fs::File::create(&temp_filepath)
         .unwrap_or_exit(&format!("create temp file {}", &temp_filepath.display()));
 
-    let mut filenames = args.paths.clone();
+    let mut filenames = if args.paths.is_empty() {
+        fs::read_dir(env::current_dir().unwrap())
+            .unwrap()
+            .map(|entry| PathBuf::from(entry.unwrap().path().file_name().unwrap()))
+            .collect()
+    } else {
+        args.paths.clone()
+    };
+
     filenames.sort();
     filenames.iter().for_each(|filename| {
         writeln!(temp_file, "{}", filename.display())
